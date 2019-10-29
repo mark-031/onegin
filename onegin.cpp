@@ -4,15 +4,12 @@
 #include <cassert>
 #include "utils.h"
 
-const char* FILEPATH = "hamlet.txt";
-const char* OUTPUTFILE = "out.txt";
-
 void  openFileOrExit(FILE* &fileptr, const char* path);
 int   getFileSize(FILE* file);
 int   readFile(FILE* file, char* &buffer);
 int   standardizeContent(char* start);
 void  parseContent(char* start, char** strIndex);
-void  processFile(char** &strIndex, int &strIndexLen);
+char* processFile(char** &strIndex, int &strIndexLen, FILE* file);
 char* getStartOfLine(char* item);
 int   compare(const void* first, const void* second);
 
@@ -26,7 +23,7 @@ int main(int argc, char* argv[])
 	char** strIndex = nullptr;
 	int    strIndexLen = -1;
 
-	processFile(strIndex, strIndexLen);
+	char* buffer = processFile(strIndex, strIndexLen, input);
 
 	assert(strIndex    != nullptr);
 	assert(strIndexLen != -1);
@@ -38,15 +35,9 @@ int main(int argc, char* argv[])
 		printf("%s\n", getStartOfLine(strIndex[i]));
 	}
 
+	free(buffer);
+
 	utils::close_iofiles(input, output);
-}
-
-void openFileOrExit(FILE* &fileptr, const char* path)
-{
-	fileptr = fopen(path, "r");
-
-	if (fileptr == nullptr)
-		exit(1);
 }
 
 int getFileSize(FILE* file)
@@ -122,7 +113,6 @@ int standardizeContent(char* start)
 	else
 		*newStart = '\0';
 
-	//printf(">>> successfuly standardize content (lines: %d)\n", linesCount);
 	return linesCount;
 }
 
@@ -138,22 +128,19 @@ void parseContent(char* start, char** strIndex)
 		start++;
 	}
 	*strIndex = start - 1;
-
-	//printf(">>> successfuly parsed content\n");
 }
 
-void processFile(char** &strIndex, int &strIndexLen)
+char* processFile(char** &strIndex, int &strIndexLen, FILE* file)
 {
 	char* buffer = nullptr;
-	FILE* file;
-	openFileOrExit(file, FILEPATH);
 
 	readFile(file, buffer);
-	fclose(file);
 	strIndexLen = standardizeContent(buffer + 1);
 
 	strIndex = (char**) calloc(strIndexLen, sizeof(char*));
 	parseContent(buffer + 1, strIndex);
+
+	return buffer;
 }
 
 char* getStartOfLine(char* item)
