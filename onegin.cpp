@@ -152,17 +152,17 @@ char* getStartOfLine(char* item)
 
 int compare(const void* first, const void* second)
 {
-	char* _first  = *(char**) first;
-	char* _second = *(char**) second;
+	char* first_elem  = *(char**) first;
+	char* second_elem = *(char**) second;
 
-	_first  = getStartOfLine(_first);
-	_second = getStartOfLine(_second);
+	first_elem  = getStartOfLine(first_elem);
+	second_elem = getStartOfLine(second_elem);
 
-	while (*_first == *_second && *_first != '\0')
+	while (*first_elem == *second_elem && *first_elem != '\0')
 	{
-		++_first;
-		++_second;
+		++first_elem;
+		++second_elem;
 	}
 
-	return *_first - *_second;
+	return *first_elem - *second_elem;
 }
