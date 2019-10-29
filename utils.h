@@ -1,4 +1,5 @@
-#include<stdlib.h>
+#include <stdlib.h>
+#include <string.h>
 
 namespace utils
 {
@@ -34,6 +35,22 @@ namespace utils
 	 * @return 0 if equal, > 0 if first element larger, < 0 if first elent lower
 	 */
 	int intCompare(const void* first, const void* second);
+
+	/**
+	 * Replace stdin and stdout with file
+	 * @param input link to input file
+	 * @param output link to output file
+	 * @param argc count of argv elements
+	 * @param argv array of args
+	 */
+	void load_iofiles(FILE* &input, FILE* &output, int argc, char* argv[]);
+
+	/**
+	 * Close input and output file if it was opened
+	 * @param input input file
+	 * @param output output file
+	 */
+	void close_iofiles(FILE* input, FILE* output);
 
 	void qSort(void* const start, void* const end, size_t itemSize, int (*compare)(const void*, const void*))
 	{
@@ -82,5 +99,43 @@ namespace utils
 	int intCompare(const void* first, const void* second)
 	{
 		return *(int*) first - *(int*) second;
+	}
+
+	void load_iofiles(FILE* &input, FILE* &output, int argc, char* argv[])
+	{
+		input  = nullptr;
+		output = nullptr;
+
+		for(int i = 1; i < argc; ++i)
+		{
+			if(!strcmp(argv[i], "-i") || !strcmp(argv[i], "--input"))
+			{
+				if(input != nullptr)
+					fclose(input);
+
+				input = freopen(argv[++i], "r", stdin);
+
+				continue;
+			}
+
+			if(!strcmp(argv[i], "-o") || !strcmp(argv[i], "--output"))
+			{
+				if(output != nullptr)
+					fclose(output);
+
+				output = freopen(argv[++i], "w", stdout);
+
+				continue;
+			}
+		}
+	}
+
+	void close_iofiles(FILE* input, FILE* output)
+	{
+		if (input != nullptr)
+			fclose(input);
+		
+		if (output != nullptr)
+			fclose(output);
 	}
 }

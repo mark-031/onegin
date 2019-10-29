@@ -12,47 +12,41 @@ int   getFileSize(FILE* file);
 int   readFile(FILE* file, char* &buffer);
 int   standardizeContent(char* start);
 void  parseContent(char* start, char** strIndex);
-void  processFile(char* &buffer, char** &strIndex, int &strIndexLen);
+void  processFile(char** &strIndex, int &strIndexLen);
 char* getStartOfLine(char* item);
 int   compare(const void* first, const void* second);
 
-int main()
+int main(int argc, char* argv[])
 {
-	FILE* output = freopen(OUTPUTFILE, "w", stdout);
+	FILE* input  = nullptr;
+	FILE* output = nullptr;
 
-	char*  buffer = nullptr;
+	utils::load_iofiles(input, output, argc, argv);
+
 	char** strIndex = nullptr;
 	int    strIndexLen = -1;
 
-	processFile(buffer, strIndex, strIndexLen);
+	processFile(strIndex, strIndexLen);
 
-	assert(buffer      != nullptr);
 	assert(strIndex    != nullptr);
 	assert(strIndexLen != -1);
 
 	utils::qSort(strIndex, strIndex + strIndexLen - 1, sizeof(char*), compare);
 
-	char** strs = strIndex;
-	while (strs < strIndex + strIndexLen)
+	for(int i = 0; i < strIndexLen; ++i)
 	{
-		printf("%s\n", getStartOfLine((char*) *strs));
-		strs++;
+		printf("%s\n", getStartOfLine(strIndex[i]));
 	}
 
-	fclose(output);
+	utils::close_iofiles(input, output);
 }
 
 void openFileOrExit(FILE* &fileptr, const char* path)
 {
 	fileptr = fopen(path, "r");
 
-	while (fileptr == nullptr)
-	{
-		//puts("Unable to open file\n");
+	if (fileptr == nullptr)
 		exit(1);
-	}
-
-	//printf(">>> successfuly open file \"%s\" \n", path);
 }
 
 int getFileSize(FILE* file)
@@ -64,14 +58,11 @@ int getFileSize(FILE* file)
 	fseek(file, 0, SEEK_SET);
 
 	assert(size > 0);
-	//printf(">>> successfuly get file size (%d)\n", size);
 	return size;
 }
 
 int readFile(FILE* file, char* &buffer)
 {
-	//puts("\nStart read file");
-
 	int size = getFileSize(file) + 2;
 	buffer = (char*) calloc(size, sizeof(char));
 
@@ -80,8 +71,6 @@ int readFile(FILE* file, char* &buffer)
 	*(buffer) = *(buffer + size - 1) = '\0';
 	
 	fread(buffer + 1, sizeof(char), size, file);
-
-	//puts("End read file\n");
 
 	return size;
 }
@@ -153,8 +142,9 @@ void parseContent(char* start, char** strIndex)
 	//printf(">>> successfuly parsed content\n");
 }
 
-void processFile(char* &buffer, char** &strIndex, int &strIndexLen)
+void processFile(char** &strIndex, int &strIndexLen)
 {
+	char* buffer = nullptr;
 	FILE* file;
 	openFileOrExit(file, FILEPATH);
 
