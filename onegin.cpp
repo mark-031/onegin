@@ -4,12 +4,11 @@
 #include <cassert>
 #include "utils.h"
 
-void  openFileOrExit(FILE* &fileptr, const char* path);
 int   getFileSize(FILE* file);
 int   readFile(FILE* file, char* &buffer);
 int   standardizeContent(char* start);
-void  parseContent(char* start, char** strIndex);
-char* processFile(char** &strIndex, int &strIndexLen, FILE* file);
+void  parseContent(char* parsUnit, char** textLines);
+char* processFile(char** &textLines, int &linesCount, FILE* file);
 char* getStartOfLine(char* item);
 int   compare(const void* first, const void* second);
 
@@ -20,19 +19,19 @@ int main(int argc, char* argv[])
 
 	utils::load_iofiles(input, output, argc, argv);
 
-	char** strIndex = nullptr;
-	int    strIndexLen = -1;
+	char** textLines  = nullptr;
+	int    linesCount = -1;
 
-	char* buffer = processFile(strIndex, strIndexLen, input);
+	char* buffer = processFile(textLines, linesCount, input);
 
-	assert(strIndex    != nullptr);
-	assert(strIndexLen != -1);
+	assert(textLines  != nullptr);
+	assert(linesCount != -1);
 
-	utils::qSort(strIndex, strIndex + strIndexLen - 1, sizeof(char*), compare);
+	utils::qSort(textLines, textLines + linesCount - 1, sizeof(char*), compare);
 
-	for(int i = 0; i < strIndexLen; ++i)
+	for(int i = 0; i < linesCount; ++i)
 	{
-		printf("%s\n", getStartOfLine(strIndex[i]));
+		printf("%s\n", getStartOfLine(textLines[i]));
 	}
 
 	free(buffer);
@@ -116,29 +115,29 @@ int standardizeContent(char* start)
 	return linesCount;
 }
 
-void parseContent(char* start, char** strIndex)
+void parseContent(char* parsUnit, char** textLines)
 {
-	while (*start != '\0')
+	while (*parsUnit != '\0')
 	{
-		if (*start == '\n')
+		if (*parsUnit == '\n')
 		{
-			*(strIndex++) = start - 1;
-			*start = '\0';
+			*(textLines++) = parsUnit - 1;
+			*parsUnit = '\0';
 		}
-		start++;
+		parsUnit++;
 	}
-	*strIndex = start - 1;
+	*textLines = parsUnit - 1;
 }
 
-char* processFile(char** &strIndex, int &strIndexLen, FILE* file)
+char* processFile(char** &textLines, int &linesCount, FILE* file)
 {
 	char* buffer = nullptr;
 
 	readFile(file, buffer);
-	strIndexLen = standardizeContent(buffer + 1);
+	linesCount = standardizeContent(buffer + 1);
 
-	strIndex = (char**) calloc(strIndexLen, sizeof(char*));
-	parseContent(buffer + 1, strIndex);
+	textLines = (char**) calloc(linesCount, sizeof(char*));
+	parseContent(buffer + 1, textLines);
 
 	return buffer;
 }
