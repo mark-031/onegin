@@ -4,13 +4,13 @@
 #include <cassert>
 #include "utils.h"
 
-int   getFileSize(FILE* file);
-int   readFile(FILE* file, char* &buffer);
-int   standardizeContent(char* start);
-void  parseContent(char* parsUnit, char** textLines);
-char* processFile(char** &textLines, int &linesCount, FILE* file);
-char* getStartOfLine(char* item);
-int   compare(const void* first, const void* second);
+int          getFileSize(FILE* file);
+int          readFile(FILE* file, char* &buffer);
+unsigned int standardizeContent(char* start);
+void         parseContent(char* parsUnit, char** textLines);
+char*        processFile(char** &textLines, int &linesCount, FILE* file);
+char*        getStartOfLine(char* item);
+int          compare(const void* first, const void* second);
 
 int main(int argc, char* argv[])
 {
@@ -56,7 +56,8 @@ int readFile(FILE* file, char* &buffer)
 	int size = getFileSize(file) + 2;
 	buffer = (char*) calloc(size, sizeof(char));
 
-	assert(buffer != nullptr);
+	if (buffer == nullptr)
+		return 1;
 
 	*(buffer) = *(buffer + size - 1) = '\0';
 	
@@ -65,9 +66,11 @@ int readFile(FILE* file, char* &buffer)
 	return size;
 }
 
-int standardizeContent(char* start)
+unsigned int standardizeContent(char* start)
 {
-	int linesCount = 1;
+	assert(start != nullptr);
+
+	unsigned int linesCount = 1;
 	char* newStart = start;
 
 	while (*start == '\n' || *start == ' ' || *start == '\t')
@@ -112,6 +115,8 @@ int standardizeContent(char* start)
 	else
 		*newStart = '\0';
 
+	assert(linesCount != 0);
+
 	return linesCount;
 }
 
@@ -124,13 +129,17 @@ void parseContent(char* parsUnit, char** textLines)
 			*(textLines++) = parsUnit - 1;
 			*parsUnit = '\0';
 		}
+
 		parsUnit++;
 	}
+
 	*textLines = parsUnit - 1;
 }
 
 char* processFile(char** &textLines, int &linesCount, FILE* file)
 {
+	assert(file);
+
 	char* buffer = nullptr;
 
 	readFile(file, buffer);
@@ -146,6 +155,7 @@ char* getStartOfLine(char* item)
 {
 	while (*item != '\0')
 		item--;
+		
 	return ++item;
 }
 
